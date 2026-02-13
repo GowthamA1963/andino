@@ -38,7 +38,7 @@ def generate_launch_description():
             name='teleop_twist_keyboard_node',
             output='screen',
             prefix = 'xterm -e',
-            use_sim_time=True
+            parameters=[{'use_sim_time': True}]
          )
 
     return LaunchDescription([
