@@ -1,2 +1,0 @@
-class SubscribeError(Exception):
-    pass

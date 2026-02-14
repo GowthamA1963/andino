@@ -1,6 +1,0 @@
-/static/
-/build
-/artifacts
-
-# browserstack local logs
-/local.log
