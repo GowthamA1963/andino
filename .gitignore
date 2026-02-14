@@ -1,6 +1,15 @@
 *.build
 *.install
 
+# Colcon build directories
+build/
+install/
+log/
+
+# TF frames output files
+frames_*.gv
+frames_*.pdf
+
 # PlatformIO files
 .pio
 
@@ -9,3 +18,22 @@
 
 # PyCache
 *.pyc
+
+# RMF Web Dashboard (rmf-web)
+node_modules/
+.pnpm-debug.log
+pnpm-lock.yaml
+package-lock.json
+.venv/
+.husky/
+*.log
+
+# RMF Fleet Adapter
+*.pyc
+__pycache__/
+.pytest_cache/
+Pipfile.lock
+
+# RMF Navigation Graphs and Maps (backup files)
+*.yaml.bak
+*.json.bak
