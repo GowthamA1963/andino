@@ -90,6 +90,8 @@ bool Pid::enabled() { return enabled_; }
 /// @brief Disable PID
 void Pid::disable() { enabled_ = false; }
 
+int Pid::get_output() { return last_output_; }
+
 void Pid::compute(int encoder_count, int& computed_output) {
   if (!enabled_) {
     // Reset PID once to prevent startup spikes.

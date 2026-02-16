@@ -60,4 +60,14 @@ struct Constants {
   static constexpr int kPidKo{10};
 };
 
+// Start of configuration flags.
+
+// Uncomment the following line to use a single channel encoder (e.g. yellow motors).
+#define SINGLE_CHANNEL_ENCODER
+
+// Uncomment the following line to use the IMU sensor (BNO055).
+// #define USE_IMU
+
+// End of configuration flags.
+
 }  // namespace andino

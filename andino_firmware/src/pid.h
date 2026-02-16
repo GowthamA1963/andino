@@ -59,6 +59,11 @@ class Pid {
   /// @brief Disables the PID controller.
   void disable();
 
+  /// @brief Gets the last computed output.
+  ///
+  /// @return Last computed output value.
+  int get_output();
+
   /// @brief Computes a new output.
   ///
   /// @param encoder_count Current encoder value.

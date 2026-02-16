@@ -94,6 +94,11 @@ class Encoder {
   /// @brief Sets the ticks count value to zero.
   void reset();
 
+  /// @brief Sets the encoder counting direction.
+  ///
+  /// @param direction Encoder counting direction.
+  void set_direction(int direction);
+
  private:
   /// Ticks delta lookup table. Its content is defined as follows:
   ///   +--------+-----+-----+--------+-----------+
@@ -156,6 +161,9 @@ class Encoder {
 
   /// Ticks count.
   volatile long count_{0L};
+
+  /// Encoder direction.
+  int direction_{1};
 };
 
 }  // namespace andino

@@ -64,6 +64,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "encoder.h"
 
+#include "constants.h"
 #include <stdint.h>
 
 #include "interrupt_in.h"
@@ -109,13 +110,19 @@ long Encoder::read() { return count_; }
 
 void Encoder::reset() { count_ = 0L; }
 
+void Encoder::set_direction(int direction) { direction_ = direction; }
+
 void Encoder::callback() {
+#ifdef SINGLE_CHANNEL_ENCODER
+  count_ += direction_;
+#else
   // Read the current channels state into the lowest 2 bits of the encoder state.
   state_ <<= 2;
   state_ |= (channel_b_interrupt_in_->read() << 1) | channel_a_interrupt_in_->read();
 
   // Update the encoder count accordingly.
   count_ += kTicksDelta[(state_ & 0x0F)];
+#endif
 }
 
 }  // namespace andino

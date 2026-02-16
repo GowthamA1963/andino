@@ -121,7 +121,9 @@ unsigned long App::last_set_motors_speed_cmd_{0};
 
 bool App::is_imu_connected{false};
 
+#ifdef USE_IMU
 Adafruit_BNO055 App::bno055_imu_{/*sensorID=*/55, BNO055_ADDRESS_A, &Wire};
+#endif
 
 void App::setup() {
   // Required by Arduino libraries to work.
@@ -153,11 +155,13 @@ void App::setup() {
   shell_.register_command(Commands::kGetIsImuConnected, cmd_get_is_imu_connected_cb);
   shell_.register_command(Commands::kReadEncodersAndImu, cmd_read_encoders_and_imu_cb);
 
+#ifdef USE_IMU
   // Initialize IMU sensor.
   if (bno055_imu_.begin()) {
     bno055_imu_.setExtCrystalUse(true);
     is_imu_connected = true;
   }
+#endif
 }
 
 void App::loop() {
@@ -185,6 +189,20 @@ void App::loop() {
 void App::adjust_motors_speed() {
   int left_motor_speed = 0;
   int right_motor_speed = 0;
+
+#ifdef SINGLE_CHANNEL_ENCODER
+  // For single channel encoders, we need to artificially set the direction of the encoder
+  // based on the motor command direction.
+  // Note: This logic assumes that the motor doesn't slip backwards.
+  left_motor_speed = left_pid_controller_.get_output();
+  left_encoder_.set_direction(left_motor_speed >= 0 ? 1 : -1);
+
+  right_motor_speed = right_pid_controller_.get_output();
+  right_encoder_.set_direction(right_motor_speed >= 0 ? 1 : -1);
+#else
+  // For quadrature encoders, direction is automatically handled.
+#endif
+
   left_pid_controller_.compute(left_encoder_.read(), left_motor_speed);
   right_pid_controller_.compute(right_encoder_.read(), right_motor_speed);
   if (left_pid_controller_.enabled()) {
@@ -280,6 +298,12 @@ void App::cmd_set_motors_pwm_cb(int argc, char** argv) {
   right_pid_controller_.disable();
   left_motor_.set_speed(left_motor_pwm);
   right_motor_.set_speed(right_motor_pwm);
+
+#ifdef SINGLE_CHANNEL_ENCODER
+  left_encoder_.set_direction(left_motor_pwm >= 0 ? 1 : -1);
+  right_encoder_.set_direction(right_motor_pwm >= 0 ? 1 : -1);
+#endif
+
   Serial.println("OK");
 }
 
@@ -323,6 +347,7 @@ void App::cmd_read_encoders_and_imu_cb(int, char**) {
   Serial.print(right_encoder_.read());
   Serial.print(" ");
 
+#ifdef USE_IMU
   // Retrieve absolute orientation (quaternion). See
   // https://learn.adafruit.com/adafruit-bno055-absolute-orientation-sensor/overview for further
   // information.
@@ -356,6 +381,33 @@ void App::cmd_read_encoders_and_imu_cb(int, char**) {
   Serial.print(linear_acceleration.y());
   Serial.print(" ");
   Serial.print(linear_acceleration.z());
+#else
+  // If IMU is disabled, return zeros for all IMU fields.
+  // Quaternion (x, y, z, w) -> 0 0 0 1 (identity)
+  Serial.print(0.0, 4);
+  Serial.print(" ");
+  Serial.print(0.0, 4);
+  Serial.print(" ");
+  Serial.print(0.0, 4);
+  Serial.print(" ");
+  Serial.print(1.0, 4);
+  Serial.print(" ");
+
+  // Angular velocity (x, y, z) -> 0 0 0
+  Serial.print(0.0);
+  Serial.print(" ");
+  Serial.print(0.0);
+  Serial.print(" ");
+  Serial.print(0.0);
+  Serial.print(" ");
+
+  // Linear acceleration (x, y, z) -> 0 0 0
+  Serial.print(0.0);
+  Serial.print(" ");
+  Serial.print(0.0);
+  Serial.print(" ");
+  Serial.print(0.0);
+#endif
 }
 
 }  // namespace andino
