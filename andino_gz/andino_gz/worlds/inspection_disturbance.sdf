@@ -1,0 +1,301 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<sdf version='1.7'>
+  <!--
+    Inspection Disturbance World
+    ============================
+    Based on the depot layout with three added friction zones to evaluate
+    disturbance rejection of the hybrid controller:
+
+    Zone A (Blue)  — Low friction  (μ=0.1)  simulates wet/oily floor
+    Zone B (Red)   — High friction (μ=3.0)  simulates rubber mat / rough floor
+    Zone C (Green) — Normal        (μ=0.7)  baseline reference zone
+
+    The robot's reference trajectory (circle r=2m) passes through all zones.
+  -->
+  <world name='gazebo_world'>
+
+    <physics name='1ms' type='ignored'>
+      <max_step_size>0.01</max_step_size>
+      <real_time_factor>1</real_time_factor>
+    </physics>
+
+    <plugin name='ignition::gazebo::systems::Physics'
+            filename='libignition-gazebo-physics-system.so'/>
+    <plugin name='ignition::gazebo::systems::UserCommands'
+            filename='libignition-gazebo-user-commands-system.so'/>
+    <plugin name='ignition::gazebo::systems::SceneBroadcaster'
+            filename='libignition-gazebo-scene-broadcaster-system.so'/>
+    <plugin name='ignition::gazebo::systems::Imu'
+            filename='ignition-gazebo-imu-system'/>
+    <plugin name='ignition::gazebo::systems::Sensors'
+            filename='ignition-gazebo-sensors-system'>
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <scene>
+      <ambient>1 1 1 1</ambient>
+      <background>0.2 0.2 0.3 1</background>
+      <shadows>1</shadows>
+      <grid>0</grid>
+    </scene>
+
+    <!-- ── Ground plane ─────────────────────────────────────────────────── -->
+    <model name='ground_plane'>
+      <static>1</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>30 30</size>
+            </plane>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>0.7</mu>
+                <mu2>0.7</mu2>
+              </ode>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>30 30</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.6 0.6 0.6 1</ambient>
+            <diffuse>0.6 0.6 0.6 1</diffuse>
+          </material>
+        </visual>
+      </link>
+      <pose>0 0 0 0 0 0</pose>
+    </model>
+
+    <!-- ────────────────────────────────────────────────────────────────────
+         FRICTION ZONE A — Low friction (wet floor) — BLUE
+         Position: robot passes through this at ~0°→90° on circle
+    ─────────────────────────────────────────────────────────────────────── -->
+    <model name='friction_zone_A_low'>
+      <static>1</static>
+      <pose>2.0 0.0 0.002 0 0 0</pose>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box><size>1.5 1.5 0.001</size></box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>0.1</mu>
+                <mu2>0.1</mu2>
+              </ode>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box><size>1.5 1.5 0.001</size></box>
+          </geometry>
+          <material>
+            <ambient>0.1 0.3 0.9 0.4</ambient>
+            <diffuse>0.1 0.3 0.9 0.4</diffuse>
+            <emissive>0.0 0.1 0.4 0.4</emissive>
+          </material>
+          <transparency>0.5</transparency>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ────────────────────────────────────────────────────────────────────
+         FRICTION ZONE B — High friction (rough mat) — RED
+         Position: robot passes through this at ~90°→180° on circle
+    ─────────────────────────────────────────────────────────────────────── -->
+    <model name='friction_zone_B_high'>
+      <static>1</static>
+      <pose>0.0 2.0 0.002 0 0 0</pose>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box><size>1.5 1.5 0.001</size></box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>3.0</mu>
+                <mu2>3.0</mu2>
+              </ode>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box><size>1.5 1.5 0.001</size></box>
+          </geometry>
+          <material>
+            <ambient>0.9 0.1 0.1 0.4</ambient>
+            <diffuse>0.9 0.1 0.1 0.4</diffuse>
+            <emissive>0.4 0.0 0.0 0.4</emissive>
+          </material>
+          <transparency>0.5</transparency>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ────────────────────────────────────────────────────────────────────
+         FRICTION ZONE C — Normal friction (reference) — GREEN
+         Position: robot passes through this at ~270°→360° on circle
+    ─────────────────────────────────────────────────────────────────────── -->
+    <model name='friction_zone_C_normal'>
+      <static>1</static>
+      <pose>0.0 -2.0 0.002 0 0 0</pose>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <box><size>1.5 1.5 0.001</size></box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>0.7</mu>
+                <mu2>0.7</mu2>
+              </ode>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box><size>1.5 1.5 0.001</size></box>
+          </geometry>
+          <material>
+            <ambient>0.1 0.8 0.1 0.4</ambient>
+            <diffuse>0.1 0.8 0.1 0.4</diffuse>
+            <emissive>0.0 0.3 0.0 0.4</emissive>
+          </material>
+          <transparency>0.5</transparency>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ── Zone labels (thin vertical panels acting as signs) ──────────── -->
+    <model name='label_A'>
+      <static>1</static>
+      <pose>2.85 0.0 0.3 0 0 0</pose>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry><box><size>0.05 0.4 0.6</size></box></geometry>
+          <material>
+            <ambient>0.1 0.3 0.9 1</ambient>
+            <diffuse>0.1 0.3 0.9 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name='label_B'>
+      <static>1</static>
+      <pose>0.0 2.85 0.3 0 0 0</pose>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry><box><size>0.4 0.05 0.6</size></box></geometry>
+          <material>
+            <ambient>0.9 0.1 0.1 1</ambient>
+            <diffuse>0.9 0.1 0.1 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name='label_C'>
+      <static>1</static>
+      <pose>0.0 -2.85 0.3 0 0 0</pose>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry><box><size>0.4 0.05 0.6</size></box></geometry>
+          <material>
+            <ambient>0.1 0.8 0.1 1</ambient>
+            <diffuse>0.1 0.8 0.1 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ── Inspection obstacles (walls / narrow passage) ────────────────── -->
+    <model name='wall_north'>
+      <static>1</static>
+      <pose>0 7 1 0 0 0</pose>
+      <link name='link'>
+        <collision name='c'><geometry><box><size>14 0.2 2</size></box></geometry></collision>
+        <visual name='v'>
+          <geometry><box><size>14 0.2 2</size></box></geometry>
+          <material><ambient>0.5 0.5 0.5 1</ambient></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name='wall_south'>
+      <static>1</static>
+      <pose>0 -7 1 0 0 0</pose>
+      <link name='link'>
+        <collision name='c'><geometry><box><size>14 0.2 2</size></box></geometry></collision>
+        <visual name='v'>
+          <geometry><box><size>14 0.2 2</size></box></geometry>
+          <material><ambient>0.5 0.5 0.5 1</ambient></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name='wall_east'>
+      <static>1</static>
+      <pose>7 0 1 0 0 0</pose>
+      <link name='link'>
+        <collision name='c'><geometry><box><size>0.2 14 2</size></box></geometry></collision>
+        <visual name='v'>
+          <geometry><box><size>0.2 14 2</size></box></geometry>
+          <material><ambient>0.5 0.5 0.5 1</ambient></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name='wall_west'>
+      <static>1</static>
+      <pose>-7 0 1 0 0 0</pose>
+      <link name='link'>
+        <collision name='c'><geometry><box><size>0.2 14 2</size></box></geometry></collision>
+        <visual name='v'>
+          <geometry><box><size>0.2 14 2</size></box></geometry>
+          <material><ambient>0.5 0.5 0.5 1</ambient></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ── Inspection shelf obstacles (narrow passage at x=-3) ─────────── -->
+    <model name='shelf_left'>
+      <static>1</static>
+      <pose>-4 -4 0.75 0 0 0</pose>
+      <link name='link'>
+        <collision name='c'><geometry><box><size>0.3 3 1.5</size></box></geometry></collision>
+        <visual name='v'>
+          <geometry><box><size>0.3 3 1.5</size></box></geometry>
+          <material><ambient>0.7 0.5 0.3 1</ambient></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name='shelf_right'>
+      <static>1</static>
+      <pose>-4 4 0.75 0 0 0</pose>
+      <link name='link'>
+        <collision name='c'><geometry><box><size>0.3 3 1.5</size></box></geometry></collision>
+        <visual name='v'>
+          <geometry><box><size>0.3 3 1.5</size></box></geometry>
+          <material><ambient>0.7 0.5 0.3 1</ambient></material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

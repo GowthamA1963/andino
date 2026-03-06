@@ -1,0 +1,58 @@
+# ============================================================
+#  Hybrid Nonlinear Control + SAC RL Disturbance Compensator
+#  Configuration Parameters
+# ============================================================
+#
+# Set rl_enabled: false for baseline (pure model-based) runs.
+# Set rl_compensator.mode: "random" to start; swap to "online"
+# or "pretrained" once you have a trained model.
+
+# ── Trajectory Generator ──────────────────────────────────────
+trajectory_generator:
+  ros__parameters:
+    trajectory_type: "circle"   # circle | figure8 | lemniscate | square
+    radius:    2.0              # metres (half-side length for square)
+    speed:     0.15             # m/s along the path
+    loop:      true
+    center_x:  0.0
+    center_y:  0.0
+    publish_rate: 50.0          # Hz (Faster for better stability)
+
+# ── Nonlinear Controller (Feedback Linearization) ─────────────
+nonlinear_controller:
+  ros__parameters:
+    k1:          2.0    # Lowered for stable "following" behavior
+    k2:          2.0    # Lowered for stable "following" behavior
+    k3:          0.0    # Disabled heading correction (let FL handle it purely)
+    ki:          0.05   # Very small I-gain to prevent windup snaking
+    d:           0.3    # Large look-ahead [m] for maximum stability
+    v_max:       0.6    
+    omega_max:   2.5    
+    publish_rate: 50.0  # Hz
+
+# ── RL Disturbance Compensator (SAC) ──────────────────────────
+rl_disturbance_compensator:
+  ros__parameters:
+    # mode options:
+    #   "random"     — bounded random noise (no training required)
+    #   "online"     — train SAC online in simulation
+    #   "pretrained" — load a stable-baselines3 .zip model
+    mode:              "online"
+    correction_bound:  0.15      
+    model_path:        ""        
+    publish_rate:      50.0      # Hz
+    train_every_n_steps: 5       # Faster learning
+    warmup_steps:      300       # Reduced warmup
+
+# ── Hybrid Controller ─────────────────────────────────────────
+hybrid_controller:
+  ros__parameters:
+    rl_enabled:  true   # false → pure model-based (baseline mode)
+    v_max:       0.6    # Match nonlinear controller
+    omega_max:   2.5    # Match nonlinear controller
+
+# ── Performance Monitor ───────────────────────────────────────
+performance_monitor:
+  ros__parameters:
+    window_size:  200   # rolling window for RMS calculation (steps)
+    log_interval: 10.0  # terminal summary interval [s]
